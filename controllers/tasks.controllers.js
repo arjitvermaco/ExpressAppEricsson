@@ -13,15 +13,47 @@ const createTask = async(req,res)=>{
 }
 
 const getTask = async(req,res)=>{
-    res.send('Get a single task')
-}
-
-const updateTask = async(req,res)=>{
-    res.send('Update a task')
+    console.log(req.params)
+    const {id : taskID} = req.params
+    if(Number(taskID.length) !== 24){
+        return res.status(400).json({msg:`Invalid id : ${taskID}`})
+    }
+    //Find the item in tasks collection matching the id in params
+    const task = await Task.findOne({_id:taskID})
+    if(!task){
+        return res.status(404).json({msg:`No task with id : ${taskID}`})
+    }
+    res.status(200).json({task})
 }
 
 const deleteTask = async(req,res)=>{
-    res.send('Delete a task')
+    const {id : taskID} = req.params;
+    if(Number(taskID.length) !== 24){
+        return res.status(400).json({msg:`Invalid id : ${taskID}`})
+    }
+    const task = await Task.findOneAndDelete({_id:taskID});
+    if(!task){
+        return res.status(404).json({msg:`No task with id : ${taskID}`})
+    }
+    res.status(200).json({task})
 }
+
+
+const updateTask = async(req,res)=>{
+    const {id : taskID} = req.params;
+    if(Number(taskID.length) !== 24){
+        return res.status(400).json({msg:`Invalid id : ${taskID}`})
+    }
+    const task = await Task.findOneAndUpdate({_id:taskID},req.body,{
+        new:true,
+        runValidators:true
+    });
+    if(!task){
+        return res.status(404).json({msg:`No task with id : ${taskID}`})
+    }
+    res.status(200).json({task})
+   
+}
+
 
 export {getAllTasks, createTask, getTask, updateTask, deleteTask}
